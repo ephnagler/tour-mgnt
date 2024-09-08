@@ -1,5 +1,5 @@
 {
-  "name": "tour-mgnt-ab56",
+  "name": "tour-mgnt",
   "private": true,
   "sideEffects": false,
   "scripts": {
@@ -25,6 +25,8 @@
   ],
   "dependencies": {
     "@prisma/client": "^5.19.1",
+    "@relume_io/relume-tailwind": "^0.5.1",
+    "@relume_io/relume-ui": "^0.5.1",
     "@remix-run/css-bundle": "^2.11.2",
     "@remix-run/node": "^2.11.2",
     "@remix-run/react": "^2.11.2",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@faker-js/faker": "^9.0.0",
     "@remix-run/dev": "^2.11.2",
+    "@tailwindcss/typography": "^0.5.15",
     "@testing-library/cypress": "^10.0.2",
     "@testing-library/jest-dom": "^6.5.0",
     "@types/bcryptjs": "^2.4.6",
@@ -77,6 +80,7 @@
     "prisma": "^5.19.1",
     "start-server-and-test": "^2.0.5",
     "tailwindcss": "^3.4.10",
+    "tailwindcss-animate": "^1.0.7",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.5.4",

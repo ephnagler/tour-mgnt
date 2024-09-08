@@ -6,4 +6,5 @@ export default {
     extend: {},
   },
   plugins: [],
+  presets: [require("@relume_io/relume-tailwind")],
 } satisfies Config;

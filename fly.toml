@@ -1,8 +1,9 @@
-app = "tour-mgnt-ab56"
+app = "tour-mgnt"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]
 swap_size_mb = 512
+primary_region = "iad"
 
 [experimental]
 allowed_public_ports = [ ]
