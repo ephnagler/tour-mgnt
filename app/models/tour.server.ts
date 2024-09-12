@@ -1,4 +1,4 @@
-import { Daysheet, Venue, Hotel, Address, Contact, Guest, Schedule } from "@prisma/client";
+import { Daysheet, Venue, Hotel, Contact, Guest, Schedule } from "@prisma/client";
 
 import { prisma } from "~/db.server";
 
@@ -7,6 +7,9 @@ import { prisma } from "~/db.server";
 export function getDaysheet({ slug }: Pick<Daysheet, "slug">) {
     return prisma.daysheet.findFirst({
         where: { slug },
+        include: {
+            venue: true, hotel: true
+        }
     });
 }
 
@@ -17,12 +20,12 @@ export async function createDaysheet(slug: Daysheet["slug"], date: Daysheet["dat
             date,
             venue: {
                 connect: {
-                    id: venue
+                    slug: venue
                 }
             },
             hotel: {
                 connect: {
-                    id: hotel
+                    slug: hotel
                 }
             },
             guestsLimit,
@@ -49,16 +52,19 @@ export function getVenue({ slug }: Pick<Venue, "slug">) {
     });
 }
 
-export async function createVenue(slug: Venue["slug"], name: Venue["name"], address: Venue["addressId"]) {
+export async function createVenue(slug: Venue["slug"], name: Venue["name"], site: Venue["site"], street: Venue["street"], city: Venue["city"], state: Venue["state"], zip: Venue["zip"], phone: Venue["phone"], email: Venue["email"]) {
     return prisma.venue.create({
         data: {
             slug,
             name,
-            address: {
-                connect: {
-                    id: address
-                }
-            }
+            site,
+            street,
+            city,
+            state,
+            zip,
+            phone,
+            email
+
         },
     });
 }
@@ -72,22 +78,24 @@ export function deleteVenue({ slug }: Pick<Venue, "slug">) {
 /*--- HOTEL ---*/
 
 export function getHotel({ slug }: Pick<Hotel, "slug">) {
-    return prisma.venue.findFirst({
+    return prisma.hotel.findFirst({
         where: { slug },
     });
 }
 
-export async function createHotel(slug: Hotel["slug"], name: Hotel["name"], address: Hotel["addressId"]) {
+export async function createHotel(slug: Hotel["slug"], name: Hotel["name"], site: Hotel["site"], street: Venue["street"], city: Venue["city"], state: Venue["state"], zip: Venue["zip"], phone: Venue["phone"], email: Venue["email"]) {
     return prisma.hotel.create({
         data: {
             slug,
             name,
-            address: {
-                connect: {
-                    id: address
-                }
-            }
-        },
+            site,
+            street,
+            city,
+            state,
+            zip,
+            phone,
+            email
+        }
     });
 }
 
@@ -97,61 +105,35 @@ export function deleteHotel({ slug }: Pick<Hotel, "slug">) {
     });
 }
 
-/*--- ADDRESS ---*/
-
-export function getAddress({ slug }: Pick<Address, "slug">) {
-    return prisma.address.findFirst({
-        where: { slug },
-    });
-}
-
-export async function createAddress(slug: Address["slug"], name: Address["name"], street: Address["street"], city: Address["city"], state: Address["state"], zip: Address["zip"], phone: Address["phone"], email: Address["email"]) {
-    return prisma.address.create({
-        data: {
-            slug,
-            name,
-            street,
-            city,
-            state,
-            zip,
-            phone,
-            email
-
-        }
-    });
-}
-
-export function deleteAddress({ slug }: Pick<Address, "slug">) {
-    return prisma.address.deleteMany({
-        where: { slug },
-    });
-}
-
 /*--- CONTACT ---*/
 
 export function getContact({ slug }: Pick<Contact, "slug">) {
     return prisma.contact.findFirst({
         where: { slug },
+        include: {
+            venue: true, daysheet: true
+        }
     });
 }
 
-export async function createContact(slug: Contact["slug"], name: Contact["name"], phone: Contact["phone"], email: Contact["email"], venueId: Contact["venueId"], daysheetId: Contact["daysheetId"]) {
+export async function createContact(slug: Contact["slug"], name: Contact["name"], role: Contact["role"], phone: Contact["phone"], email: Contact["email"], venue?: Contact["venueId"], daysheet?: Contact["daysheetId"]) {
     return prisma.contact.create({
         data: {
             slug,
             name,
+            role,
             phone,
             email,
-            venue: {
+            venue: venue ? {
                 connect: {
-                    id: venueId ?? ""
+                    id: venue
                 },
-            },
-            daysheet: {
+            } : undefined,
+            daysheet: daysheet ? {
                 connect: {
-                    id: daysheetId ?? ""
+                    id: daysheet
                 }
-            },
+            } : undefined,
         }
     });
 }
@@ -171,17 +153,17 @@ export function getGuest({ slug }: Pick<Guest, "slug">) {
     });
 }
 
-export async function createGuest(slug: Guest["slug"], name: Guest["name"], party: Guest["party"], daysheetId: Guest["daysheetId"]) {
+export async function createGuest(slug: Guest["slug"], name: Guest["name"], party: Guest["party"], daysheet?: Guest["daysheetId"]) {
     return prisma.guest.create({
         data: {
             slug,
             name,
             party,
-            daysheet: {
+            daysheet: daysheet ? {
                 connect: {
-                    id: daysheetId
+                    id: daysheet
                 }
-            }
+            } : undefined
 
         },
     });
@@ -198,21 +180,23 @@ export function deleteGuest({ slug }: Pick<Guest, "slug">) {
 export function getSchedule({ slug }: Pick<Schedule, "slug">) {
     return prisma.schedule.findFirst({
         where: { slug },
+        include: { daysheet: true }
     });
 }
 
-export async function createSchedule(slug: Schedule["slug"], name: Schedule["name"], timeFrom: Schedule["timeFrom"], timeTo: Schedule["timeTo"], daysheetId: Schedule["daysheetId"]) {
+export async function createSchedule(slug: Schedule["slug"], name: Schedule["name"], note: Schedule["note"], timeFrom: Schedule["timeFrom"], timeTo: Schedule["timeTo"], daysheet?: Schedule["daysheetId"]) {
     return prisma.schedule.create({
         data: {
             slug,
             name,
+            note,
             timeFrom,
             timeTo,
-            daysheet: {
+            daysheet: daysheet ? {
                 connect: {
-                    id: daysheetId
+                    id: daysheet
                 }
-            }
+            } : undefined
 
         },
     });

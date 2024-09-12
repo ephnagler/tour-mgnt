@@ -13,6 +13,8 @@ import {
 import { getUser } from "~/session.server";
 import stylesheet from "~/tailwind.css";
 
+import Nav from "./components/nav";
+
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
@@ -24,14 +26,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function App() {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" data-theme="sunset">
       <head>
         <meta charSet="utf-8" />
+        <link rel="icon" href="https://fav.farm/🍣" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
       </head>
       <body className="h-full">
+        <Nav />
         <Outlet />
         <ScrollRestoration />
         <Scripts />
