@@ -5,13 +5,13 @@ export default function Nav() {
   return (
     <nav className="navbar bg-base-100">
       <div className="flex-1">
-        <Link to="/" className="btn btn-ghost rounded-none text-xl">
-          Suuns West Coast Tour Winter 2024
+        <Link to="/" className="btn sm:btn-ghost rounded-none text-xl">
+          Suuns 2024
         </Link>
       </div>
       <div className="flex-none">
         <button
-          className="btn btn-square btn-ghost rounded-none"
+          className="btn btn-square sm:btn-ghost rounded-none"
           onClick={() => {
             navigate("/admin");
           }}

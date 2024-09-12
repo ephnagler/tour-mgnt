@@ -178,7 +178,7 @@ export default function AdminDaysheets() {
               value={selectedVenue}
               className="select select-bordered w-full max-w-xs"
             >
-              <option disabled selected>
+              <option disabled>
                 Venue
               </option>
               {data.venues.map((venue) => (
@@ -196,7 +196,7 @@ export default function AdminDaysheets() {
               value={selectedHotel}
               className="select select-bordered w-full max-w-xs"
             >
-              <option disabled selected>
+              <option disabled>
                 Hotel
               </option>
               {data.hotels.map((hotel) => (
@@ -213,7 +213,9 @@ export default function AdminDaysheets() {
                 type="text"
                 name="mapIn"
                 onChange={handleInputChange}
-                defaultValue={data.daysheet.mapIn ? data.daysheet.mapIn : undefined }
+                defaultValue={
+                  data.daysheet.mapIn ? data.daysheet.mapIn : undefined
+                }
                 placeholder="Map: Hotel to Venue"
                 className="grow"
               />
@@ -224,7 +226,9 @@ export default function AdminDaysheets() {
                 type="text"
                 name="mapOut"
                 onChange={handleInputChange}
-                defaultValue={data.daysheet.mapOut ? data.daysheet.mapOut : undefined }
+                defaultValue={
+                  data.daysheet.mapOut ? data.daysheet.mapOut : undefined
+                }
                 placeholder="Map: Venue to Hotel"
                 className="grow"
               />
@@ -263,9 +267,7 @@ export default function AdminDaysheets() {
                 className="grow"
               />
             </label>
-          ) : (
-            <input type="number" value={1} name="buyOutAmount" hidden />
-          )}
+          ) : undefined}
           {!isBuyOut ? (
             <label className="input input-bordered col-span-3 flex items-center gap-2">
               <span>Dinner Alternative:</span>
@@ -277,14 +279,7 @@ export default function AdminDaysheets() {
                 className="grow"
               />
             </label>
-          ) : (
-            <input
-              type="text"
-              value="Dinner Provided"
-              name="buyOutAlt"
-              hidden
-            />
-          )}
+          ) : undefined}
           <label className="input input-bordered flex items-center gap-2">
             <span>Guest Limit:</span>
             <input

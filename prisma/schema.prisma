@@ -102,9 +102,10 @@ model Schedule {
   id         String    @id @default(cuid())
   slug       String    @unique
   name       String
+  alert      String    @default("none")
   note       String
   timeFrom   String
-  timeTo     String
+  timeTo     String?
   daysheet   Daysheet? @relation(fields: [daysheetId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   daysheetId String?   @unique
 }

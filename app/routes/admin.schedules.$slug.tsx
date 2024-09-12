@@ -16,7 +16,7 @@ import invariant from "tiny-invariant";
 import { z } from "zod";
 
 import { prisma } from "~/db.server";
-import { getSchedule } from "~/models/tour.server";
+import { alertArray, alertTypes, getSchedule } from "~/models/tour.server";
 import { Slugify } from "~/utils";
 
 export function ErrorBoundary() {
@@ -32,6 +32,7 @@ export function ErrorBoundary() {
 
 const tm = z.string();
 const tmNull = z.string().nullable();
+const AlertEnum = z.enum(alertTypes);
 
 interface ActionData {
   status: "reset" | "saved" | "view" | null;
@@ -46,10 +47,12 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     select: { id: true, slug: true, date: true, venue: true },
   });
 
+  const alerts = alertArray;
+
   if (!schedule) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ schedule, daysheets });
+  return json({ schedule, daysheets, alerts });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -57,6 +60,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const id = tm.parse(formData.get("id"));
   const name = tm.parse(formData.get("name"));
   const slug = Slugify(String(name));
+  const alert = AlertEnum.parse(formData.get("alert"));
   const note = tm.parse(formData.get("note"));
   const timeFrom = tm.parse(formData.get("timeFrom"));
   const timeTo = tm.parse(formData.get("timeTo"));
@@ -76,6 +80,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       data: {
         slug,
         name,
+        alert,
         note,
         timeFrom,
         timeTo,
@@ -100,11 +105,14 @@ export default function AdminSchedules() {
   const formRef = useRef<HTMLFormElement>(null);
   const location = useLocation();
 
+  const tm = z.string();
+
   const daysheetState = data.schedule.daysheet
     ? data.schedule.daysheet.id
     : "default";
 
   const [selectedDaysheet, setSelectedDaysheet] = useState(daysheetState);
+  const [selectedAlert, setSelectedAlert] = useState(data.schedule.alert);
 
   const handleInputChange = () => {
     setFormChanged(true);
@@ -132,6 +140,11 @@ export default function AdminSchedules() {
     setFormChanged(false);
   }, [daysheetState]);
 
+  useEffect(() => {
+    setSelectedAlert(data.schedule.alert);
+    setFormChanged(false);
+  }, [data.schedule.alert]);
+
   return (
     <Form method="post" ref={formRef}>
       <h2 className="mt-0">New Schedule</h2>
@@ -154,7 +167,7 @@ export default function AdminSchedules() {
               <input
                 type="datetime-local"
                 name="timeTo"
-                defaultValue={data.schedule.timeTo}
+                defaultValue={tm.parse(data.schedule.timeTo)}
                 onChange={handleInputChange}
                 className="input input-bordered grow"
               />
@@ -172,6 +185,21 @@ export default function AdminSchedules() {
               required
             />
           </label>
+
+          <select
+            name="alert"
+            className="select select-bordered w-full"
+            value={selectedAlert}
+            onChange={(e) => {
+              handleInputChange();
+              setSelectedAlert(e.target.value);
+            }}
+          >
+            {data.alerts.map((alert, index) => (
+              <option key={index} value={alert}>Alert: {alert}</option>
+            ))}
+          </select>
+
           <textarea
             className="textarea textarea-bordered"
             placeholder="Note"

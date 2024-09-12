@@ -4,11 +4,12 @@ import { useEffect, useRef } from "react";
 import { z } from "zod";
 
 import { prisma } from "~/db.server";
-import { createSchedule } from "~/models/tour.server";
+import { alertArray, alertTypes, createSchedule } from "~/models/tour.server";
 import { Slugify } from "~/utils";
 
 const tm = z.coerce.string();
 const tmNull = z.string().nullable();
+const AlertEnum = z.enum(alertTypes);
 
 export async function loader() {
   const venues = await prisma.venue.findMany({
@@ -17,14 +18,16 @@ export async function loader() {
   const daysheets = await prisma.daysheet.findMany({
     select: { id: true, slug: true, date: true, venue: true },
   });
+  const alerts = alertArray;
 
-  return json({ venues, daysheets });
+  return json({ venues, daysheets, alerts });
 }
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const name = tm.parse(formData.get("name"));
   const slug = Slugify(String(name));
+  const alert = AlertEnum.parse(formData.get("alert"));
   const note = tm.parse(formData.get("note"));
   const timeFrom = tm.parse(formData.get("timeFrom"));
   const timeTo = tm.parse(formData.get("timeTo"));
@@ -35,6 +38,7 @@ export const action: ActionFunction = async ({ request }) => {
   const schedule = await createSchedule(
     slug,
     name,
+    alert,
     note,
     timeFrom,
     timeTo,
@@ -88,6 +92,17 @@ export default function SchedulesIndex() {
               required
             />
           </label>
+
+          <select
+            name="alert"
+            className="select select-bordered w-full"
+            defaultValue="none"
+          >
+            {data.alerts.map((alert, index) => (
+              <option key={index}>Alert: {alert}</option>
+            ))}
+          </select>
+          
           <textarea
             className="textarea textarea-bordered"
             placeholder="Note"

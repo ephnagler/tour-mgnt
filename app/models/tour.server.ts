@@ -177,6 +177,9 @@ export function deleteGuest({ slug }: Pick<Guest, "slug">) {
 
 /*--- SCHEDULE ---*/
 
+export const alertTypes = ["None", "Info", "Success", "Warning", "Error"] as const;
+export const alertArray = ["None", "Info", "Success", "Warning", "Error"];
+
 export function getSchedule({ slug }: Pick<Schedule, "slug">) {
     return prisma.schedule.findFirst({
         where: { slug },
@@ -184,11 +187,12 @@ export function getSchedule({ slug }: Pick<Schedule, "slug">) {
     });
 }
 
-export async function createSchedule(slug: Schedule["slug"], name: Schedule["name"], note: Schedule["note"], timeFrom: Schedule["timeFrom"], timeTo: Schedule["timeTo"], daysheet?: Schedule["daysheetId"]) {
+export async function createSchedule(slug: Schedule["slug"], name: Schedule["name"], alert: Schedule["alert"], note: Schedule["note"], timeFrom: Schedule["timeFrom"], timeTo: Schedule["timeTo"], daysheet?: Schedule["daysheetId"]) {
     return prisma.schedule.create({
         data: {
             slug,
             name,
+            alert,
             note,
             timeFrom,
             timeTo,
