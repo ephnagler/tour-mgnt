@@ -60,15 +60,18 @@ export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
   const id = tm.parse(formData.get("id"));
   const date = tm.parse(formData.get("date"));
-  const venue = tm.parse(formData.get("venue"));
   const slug = Slugify(date);
-  const hotel = tm.parse(formData.get("hotel"));
+  
   const guestsLimit = tmInt.parse(formData.get("guestsLimit"));
   const buyOut = tmBoo.parse(formData.get("buyOut"));
   const buyOutAmount = tmInt.parse(formData.get("buyOutAmount"));
   const buyOutAlt = tm.parse(formData.get("buyOutAlt"));
-  const mapIn = tm.parse(formData.get("mapIn"));
-  const mapOut = tm.parse(formData.get("mapOut"));
+  
+  const venue = tm.parse(formData.get("venue"));
+  const venueDisconnect = venue === "default" ? false : true;
+  const hotel = tm.parse(formData.get("hotel"));
+  const hotelDisconnect = hotel === "default" ? false : true;
+
 
   const { _action } = Object.fromEntries(formData);
 
@@ -83,21 +86,15 @@ export const action: ActionFunction = async ({ request, params }) => {
         slug,
         date,
         venue: {
-          connect: {
-            id: venue,
-          },
+          ...venueDisconnect ? {connect: {id: venue}} : {disconnect: true},
         },
         hotel: {
-          connect: {
-            id: hotel,
-          },
+          ...hotelDisconnect ? {connect: {id: hotel}} : {disconnect: true},
         },
         guestsLimit,
         buyOut,
         buyOutAmount,
         buyOutAlt,
-        mapIn,
-        mapOut,
       },
     });
 
@@ -178,7 +175,7 @@ export default function AdminDaysheets() {
               value={selectedVenue}
               className="select select-bordered w-full max-w-xs"
             >
-              <option disabled>
+              <option value="default">
                 Venue
               </option>
               {data.venues.map((venue) => (
@@ -196,7 +193,7 @@ export default function AdminDaysheets() {
               value={selectedHotel}
               className="select select-bordered w-full max-w-xs"
             >
-              <option disabled>
+              <option value="default">
                 Hotel
               </option>
               {data.hotels.map((hotel) => (
@@ -205,34 +202,6 @@ export default function AdminDaysheets() {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <label className="input input-bordered flex items-center gap-2">
-              <span className="hidden">Map: Hotel to Venue</span>
-              <input
-                type="text"
-                name="mapIn"
-                onChange={handleInputChange}
-                defaultValue={
-                  data.daysheet.mapIn ? data.daysheet.mapIn : undefined
-                }
-                placeholder="Map: Hotel to Venue"
-                className="grow"
-              />
-            </label>
-            <label className="input input-bordered flex items-center gap-2">
-              <span className="hidden">Map: Venue to Hotel</span>
-              <input
-                type="text"
-                name="mapOut"
-                onChange={handleInputChange}
-                defaultValue={
-                  data.daysheet.mapOut ? data.daysheet.mapOut : undefined
-                }
-                placeholder="Map: Venue to Hotel"
-                className="grow"
-              />
-            </label>
           </div>
         </fieldset>
 

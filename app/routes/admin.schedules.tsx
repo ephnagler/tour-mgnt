@@ -15,6 +15,7 @@ import { z } from "zod";
 
 import { prisma } from "~/db.server";
 import { deleteSchedule } from "~/models/tour.server";
+import { getScheduledTime } from "~/utils";
 
 export const meta: MetaFunction = () => [
   { title: "Schedule Admin - Suuns 2024" },
@@ -24,7 +25,7 @@ export async function loader() {
   const schedules = await prisma.schedule.findMany({
     orderBy: [
       {
-        name: "asc",
+        timeFrom: "asc",
       },
     ],
   });
@@ -128,7 +129,7 @@ export default function AdminSchedules() {
                   }}
                 >
                   <th>{index + 1}</th>
-                  <td>{schedule.timeFrom}</td>
+                  <td>{getScheduledTime(schedule.timeFrom)}</td>
                   <td>{schedule.name}</td>
                   <td className="text-right">
                     <button

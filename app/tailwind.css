@@ -16,4 +16,15 @@
   .modal {
     @apply bg-red-50;
   }
+
+  /* .table td {
+    vertical-align: top;
+  }
+
+  td ul {
+    @apply !m-0;
+  }
+  td ul li {
+    @apply !mt-0;
+  } */
 }

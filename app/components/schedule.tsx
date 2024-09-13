@@ -1,42 +1,42 @@
-export default function Schedule() {
+import { getScheduledTime } from "~/utils";
+
+interface Schedule {
+  id: string;
+  alert: string;
+  name: string;
+  note: string;
+  timeFrom: string;
+  timeTo: string | null;
+}
+
+interface ScheduleProps {
+  schedules?: Schedule[];
+}
+
+export default function Schedule(props: ScheduleProps) {
   return (
-    <section className="container prose">
+    <section id="schedule" className="container prose">
       <h2>Schedule</h2>
-      <div className="overflow-x-auto">
-        <table className="table">
-          {/* head */}
-          <thead>
-            <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Job</th>
-              <th>Favorite Color</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* row 1 */}
-            <tr>
-              <th>1</th>
-              <td>Cy Ganderton</td>
-              <td>Quality Control Specialist</td>
-              <td>Blue</td>
-            </tr>
-            {/* row 2 */}
-            <tr className="hover">
-              <th>2</th>
-              <td>Hart Hagerty</td>
-              <td>Desktop Support Technician</td>
-              <td>Purple</td>
-            </tr>
-            {/* row 3 */}
-            <tr>
-              <th>3</th>
-              <td>Brice Swyre</td>
-              <td>Tax Accountant</td>
-              <td>Red</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="flex w-full flex-col">
+        <div className="card grid rounded-box bg-base-300 px-8">
+          <div className="overflow-x-auto">
+            <table className="table">
+              <tbody>
+                {props.schedules?.map((schedule) => (
+                  <tr
+                    key={schedule.id}
+                    className="grid grid-cols-9 data-[alert=Error]:text-error data-[alert=Info]:text-info data-[alert=Primary]:text-primary data-[alert=Secondary]:text-secondary data-[alert=Success]:text-success data-[alert=Warning]:text-warning data-[alert=Accent]:text-accent"
+                    data-alert={schedule.alert}
+                  >
+                    <td>{getScheduledTime(schedule.timeFrom)}</td>
+                    <td className="col-span-2">{schedule.name}</td>
+                    <td className="col-span-6">{schedule.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </section>
   );

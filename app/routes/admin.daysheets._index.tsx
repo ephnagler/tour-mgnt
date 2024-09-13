@@ -38,33 +38,34 @@ export async function loader() {
 }
 
 const tm = z.coerce.string();
+const tmNull = z.string().nullable();
 const tmInt = z.coerce.number();
 const tmBoo = z.coerce.boolean();
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const date = tm.parse(formData.get("date"));
-  const venue = tm.parse(formData.get("venue"));
   const slug = Slugify(date);
-  const hotel = tm.parse(formData.get("hotel"));
   const guestsLimit = tmInt.parse(formData.get("guestsLimit"));
   const buyOut = tmBoo.parse(formData.get("buyOut"));
   const buyOutAmount = tmInt.parse(formData.get("buyOutAmount"));
   const buyOutAlt = tm.parse(formData.get("buyOutAlt"));
-  const mapIn = tm.parse(formData.get("mapIn"));
-  const mapOut = tm.parse(formData.get("mapOut"));
+
+  const venueEntry = tmNull.parse(formData.get("venue"));
+  const venue = venueEntry === "default" ? undefined : venueEntry;
+
+  const hotelEntry = tmNull.parse(formData.get("hotel"));
+  const hotel = hotelEntry === "default" ? undefined : hotelEntry;
 
   const daysheet = await createDaysheet(
     slug,
     date,
-    venue,
-    hotel,
     guestsLimit,
     buyOut,
     buyOutAmount,
     buyOutAlt,
-    mapIn,
-    mapOut,
+    venue,
+    hotel,
   );
 
   return redirect(`/admin/daysheets/${daysheet.slug}`);
@@ -126,26 +127,6 @@ export default function DaysheetsIndex() {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <label className="input input-bordered flex items-center gap-2">
-              <span className="hidden">Map: Hotel to Venue</span>
-              <input
-                type="text"
-                name="mapIn"
-                placeholder="Map: Hotel to Venue"
-                className="grow"
-              />
-            </label>
-            <label className="input input-bordered flex items-center gap-2">
-              <span className="hidden">Map: Venue to Hotel</span>
-              <input
-                type="text"
-                name="mapOut"
-                placeholder="Map: Venue to Hotel"
-                className="grow"
-              />
-            </label>
           </div>
         </fieldset>
 

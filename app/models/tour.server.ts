@@ -8,32 +8,30 @@ export function getDaysheet({ slug }: Pick<Daysheet, "slug">) {
     return prisma.daysheet.findFirst({
         where: { slug },
         include: {
-            venue: true, hotel: true
+            venue: true, hotel: true, schedules: {orderBy: {timeFrom: "asc" }}
         }
     });
 }
 
-export async function createDaysheet(slug: Daysheet["slug"], date: Daysheet["date"], venue: Daysheet["venueId"], hotel: Daysheet["hotelId"], guestsLimit: Daysheet["guestsLimit"], buyOut: Daysheet["buyOut"], buyOutAmount: Daysheet["buyOutAmount"], buyOutAlt: Daysheet["buyOutAlt"], mapIn: Daysheet["mapIn"], mapOut: Daysheet["mapOut"]) {
+export async function createDaysheet(slug: Daysheet["slug"], date: Daysheet["date"], guestsLimit: Daysheet["guestsLimit"], buyOut: Daysheet["buyOut"], buyOutAmount: Daysheet["buyOutAmount"], buyOutAlt: Daysheet["buyOutAlt"], venue?: Daysheet["venueId"], hotel?: Daysheet["hotelId"],) {
     return prisma.daysheet.create({
         data: {
             slug,
             date,
-            venue: {
-                connect: {
-                    slug: venue
-                }
-            },
-            hotel: {
-                connect: {
-                    slug: hotel
-                }
-            },
             guestsLimit,
             buyOut,
             buyOutAmount,
             buyOutAlt,
-            mapIn,
-            mapOut
+            venue: venue ? {
+                connect: {
+                    slug: venue
+                }
+            } : undefined,
+            hotel: hotel ? {
+                connect: {
+                    slug: hotel
+                }
+            } : undefined,
         },
     });
 }
@@ -177,8 +175,8 @@ export function deleteGuest({ slug }: Pick<Guest, "slug">) {
 
 /*--- SCHEDULE ---*/
 
-export const alertTypes = ["None", "Info", "Success", "Warning", "Error"] as const;
-export const alertArray = ["None", "Info", "Success", "Warning", "Error"];
+export const alertTypes = ["None", "Info", "Success", "Warning", "Error", "Primary", "Secondary", "Accent"] as const;
+export const alertArray = ["None", "Info", "Success", "Warning", "Error", "Primary", "Secondary", "Accent"];
 
 export function getSchedule({ slug }: Pick<Schedule, "slug">) {
     return prisma.schedule.findFirst({

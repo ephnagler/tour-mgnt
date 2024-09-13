@@ -8,12 +8,15 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
 
 import { getUser } from "~/session.server";
 import stylesheet from "~/tailwind.css";
 
 import Nav from "./components/nav";
+import { prisma } from "./db.server";
+
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -21,10 +24,23 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  return json({ user: await getUser(request) });
+
+  const daysheets = await prisma.daysheet.findMany({
+    select: {
+      date: true,
+    },
+    orderBy: [
+      {
+        date: "asc",
+      },
+    ],
+  })
+
+  return json({ user: await getUser(request), daysheets });
 };
 
 export default function App() {
+  const data = useLoaderData<typeof loader>();
   return (
     <html lang="en" className="h-full" data-theme="sunset">
       <head>
@@ -35,7 +51,7 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
-        <Nav />
+        <Nav daysheets={data.daysheets} />
         <Outlet />
         <ScrollRestoration />
         <Scripts />

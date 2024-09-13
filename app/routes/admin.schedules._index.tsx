@@ -1,11 +1,22 @@
 import { ActionFunction, json, redirect } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData, useRouteError } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 import { z } from "zod";
 
 import { prisma } from "~/db.server";
 import { alertArray, alertTypes, createSchedule } from "~/models/tour.server";
 import { Slugify } from "~/utils";
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  console.error(error);
+  return (
+    <div>
+      <h1>Error</h1>
+      <p>Please try again.</p>
+    </div>
+  );
+}
 
 const tm = z.coerce.string();
 const tmNull = z.string().nullable();
@@ -70,6 +81,7 @@ export default function SchedulesIndex() {
                 type="datetime-local"
                 name="timeFrom"
                 className="input input-bordered grow"
+                required
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -99,7 +111,7 @@ export default function SchedulesIndex() {
             defaultValue="none"
           >
             {data.alerts.map((alert, index) => (
-              <option key={index}>Alert: {alert}</option>
+              <option key={index} value={alert}>Alert: {alert}</option>
             ))}
           </select>
           

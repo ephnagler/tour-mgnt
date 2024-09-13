@@ -29,9 +29,9 @@ model Daysheet {
   slug         String     @unique
   date         String
   venue        Venue?     @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  venueId      String     @unique
+  venueId      String?    @unique
   hotel        Hotel?     @relation(fields: [hotelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  hotelId      String     @unique
+  hotelId      String?    @unique
   contacts     Contact[]
   guests       Guest[]
   guestsLimit  Int        @default(20)
@@ -39,8 +39,6 @@ model Daysheet {
   buyOutAmount Int        @default(0)
   buyOutAlt    String     @default("Dinner Provided")
   schedules    Schedule[]
-  mapIn        String?
-  mapOut       String?
 }
 
 model Venue {
@@ -107,5 +105,5 @@ model Schedule {
   timeFrom   String
   timeTo     String?
   daysheet   Daysheet? @relation(fields: [daysheetId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  daysheetId String?   @unique
+  daysheetId String?
 }
