@@ -30,7 +30,7 @@ export default function Summary(props: Summary) {
         </span>
       </h1>
 
-      <div className="shadow stats grid w-full grid-cols-5 bg-base-300">
+      <div className="shadow stats flex flex-col sm:grid w-full sm:grid-cols-5 bg-base-300">
         <div className="stat">
           <div className="stat-figure pt-3 text-accent">
             <SunIcon strokeWidth={2.5} />

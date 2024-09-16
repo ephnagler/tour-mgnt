@@ -1,6 +1,6 @@
 import { MapPinCheckInsideIcon, MapPinIcon, TargetIcon } from "lucide-react";
 
-import { getTodaySlug } from "~/utils";
+import { getTodaySlug, monthNames } from "~/utils";
 
 interface Venue {
   name: string;
@@ -42,10 +42,7 @@ export default function Progress(props: ProgressProps) {
             ) : undefined}
 
             <div className="time timeline-end timeline-compact">
-              {new Date(date.date).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-              })}
+              {monthNames[new Date(date.date).getMonth()]} {date.date.slice(8)}
             </div>
             <div className="timeline-middle">
               {today == date.date ? (

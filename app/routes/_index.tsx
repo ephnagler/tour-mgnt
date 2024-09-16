@@ -16,14 +16,14 @@ export const meta: MetaFunction = () => [
 
 export async function loader() {
   const daysheet = await getDaysheet({
-    slug: getTodaySlug()
+    slug: getTodaySlug(),
   });
 
   const daysheets = await prisma.daysheet.findMany({
     select: {
       date: true,
       venue: {
-        select: { name: true },
+        select: { name: true }
       },
     },
     orderBy: [
@@ -45,7 +45,7 @@ export default function Index() {
         city={data.daysheet?.venue?.city}
         venue={data.daysheet?.venue?.name}
       ></Summary>
-      <Information />
+      <Information venue={data.daysheet?.venue ? data.daysheet?.venue : undefined } hotel={data.daysheet?.hotel ? data.daysheet?.hotel : undefined} />
       <Schedule schedules={data.daysheet?.schedules} />
       <GuestList />
       <Progress dates={data.daysheets} />

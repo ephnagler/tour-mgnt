@@ -8,7 +8,7 @@ export function getDaysheet({ slug }: Pick<Daysheet, "slug">) {
     return prisma.daysheet.findFirst({
         where: { slug },
         include: {
-            venue: true, hotel: true, schedules: {orderBy: {timeFrom: "asc" }}
+            venue: { include: { contacts: true } }, hotel: true, schedules: { orderBy: { timeFrom: "asc" } }
         }
     });
 }
