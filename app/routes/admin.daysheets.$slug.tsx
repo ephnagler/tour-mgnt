@@ -6,13 +6,12 @@ import {
 } from "@remix-run/node";
 import {
   Form,
-  useActionData,
   useLoaderData,
   useLocation,
   useNavigate,
   useRouteError,
 } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
 import { z } from "zod";
 
@@ -31,19 +30,15 @@ export function ErrorBoundary() {
   );
 }
 
-interface ActionData {
-  status: "reset" | "saved" | "view" | null;
-}
-
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   invariant(params.slug, "Daysheet not found");
 
   const daysheet = await getDaysheet({ slug: params.slug });
   const venues = await prisma.venue.findMany({
-    select: { id: true, name: true, city: true },
+    select: { id: true, slug: true, name: true, city: true },
   });
   const hotels = await prisma.hotel.findMany({
-    select: { id: true, name: true, city: true },
+    select: { id: true, slug: true, name: true, city: true },
   });
 
   if (!daysheet) {
@@ -61,22 +56,19 @@ export const action: ActionFunction = async ({ request, params }) => {
   const id = tm.parse(formData.get("id"));
   const date = tm.parse(formData.get("date"));
   const slug = Slugify(date);
-  
+
   const guestsLimit = tmInt.parse(formData.get("guestsLimit"));
   const buyOut = tmBoo.parse(formData.get("buyOut"));
   const buyOutAmount = tmInt.parse(formData.get("buyOutAmount"));
   const buyOutAlt = tm.parse(formData.get("buyOutAlt"));
-  
-  const venue = tm.parse(formData.get("venue"));
-  const venueDisconnect = venue === "default" ? false : true;
-  const hotel = tm.parse(formData.get("hotel"));
-  const hotelDisconnect = hotel === "default" ? false : true;
 
+  const venue = tm.parse(formData.get("venue"));
+  const hotel = tm.parse(formData.get("hotel"));
 
   const { _action } = Object.fromEntries(formData);
 
   if (_action === "reset") {
-    return json({ status: "reset" });
+    return redirect(`/admin/daysheets/${slug}?reset`);
   }
 
   if (_action === "save") {
@@ -86,10 +78,14 @@ export const action: ActionFunction = async ({ request, params }) => {
         slug,
         date,
         venue: {
-          ...venueDisconnect ? {connect: {id: venue}} : {disconnect: true},
+          ...(venue != "default"
+            ? { connect: { id: venue } }
+            : { disconnect: true }),
         },
         hotel: {
-          ...hotelDisconnect ? {connect: {id: hotel}} : {disconnect: true},
+          ...(hotel != "default"
+            ? { connect: { id: hotel } }
+            : { disconnect: true }),
         },
         guestsLimit,
         buyOut,
@@ -103,53 +99,26 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default function AdminDaysheets() {
-  const actionData = useActionData<ActionData | null>();
   const data = useLoaderData<typeof loader>();
-  const [formChanged, setFormChanged] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const venueState = data.daysheet.venue ? data.daysheet.venue.id : "default";
-  const hotelState = data.daysheet.hotel ? data.daysheet.hotel.id : "default";
-
-  const [selectedVenue, setSelectedVenue] = useState(venueState);
-  const [selectedHotel, setSelectedHotel] = useState(hotelState);
-  const [isBuyOut, setIsBuyOut] = useState(data.daysheet.buyOut);
-
   useEffect(() => {
-    if (
-      actionData?.status === "reset" ||
-      location.search == "?reset" ||
-      location.search == "?edit"
-    ) {
+    if (location.search === "?reset") {
       formRef.current?.reset();
-      setFormChanged(false);
     }
-  }, [actionData, location.search]);
-
-  useEffect(() => {
-    if (location.search === "?saved") {
-      setFormChanged(false);
-    }
-  }, [location.search, navigate, data.daysheet.slug]);
-
-  useEffect(() => {
-    setSelectedVenue(venueState);
-    setSelectedHotel(hotelState);
-    setFormChanged(false);
-  }, [venueState, hotelState]);
-
-  useEffect(() => {
-    setIsBuyOut(data.daysheet.buyOut);
-  }, [data.daysheet.buyOut]);
-
-  const handleInputChange = () => {
-    setFormChanged(true);
-  };
+  }, [location.search]);
 
   return (
-    <Form method="post" ref={formRef}>
+    <Form
+      method="post"
+      ref={formRef}
+      key={data.daysheet.slug}
+      onChange={() => {
+        navigate(`/admin/daysheets/${data.daysheet.slug}?edit`);
+      }}
+    >
       <h2 className="mt-0">Edit Daysheet: {data.daysheet.date}</h2>
       <fieldset className="flex flex-col gap-2">
         <fieldset className="flex flex-col gap-4">
@@ -159,7 +128,6 @@ export default function AdminDaysheets() {
             <input
               type="date"
               name="date"
-              onChange={handleInputChange}
               defaultValue={data.daysheet.date}
               className="grow"
               required
@@ -168,16 +136,10 @@ export default function AdminDaysheets() {
           <div className="grid grid-cols-2 gap-4">
             <select
               name="venue"
-              onChange={(e) => {
-                handleInputChange();
-                setSelectedVenue(e.target.value);
-              }}
-              value={selectedVenue}
+              defaultValue={data.daysheet.venue?.id}
               className="select select-bordered w-full max-w-xs"
             >
-              <option value="default">
-                Venue
-              </option>
+              <option value="default">Venue</option>
               {data.venues.map((venue) => (
                 <option value={venue.id} key={venue.id}>
                   {venue.name} - {venue.city}
@@ -186,16 +148,10 @@ export default function AdminDaysheets() {
             </select>
             <select
               name="hotel"
-              onChange={(e) => {
-                handleInputChange();
-                setSelectedHotel(e.target.value);
-              }}
-              value={selectedHotel}
+              defaultValue={data.daysheet.hotel?.id}
               className="select select-bordered w-full max-w-xs"
             >
-              <option value="default">
-                Hotel
-              </option>
+              <option value="default">Hotel</option>
               {data.hotels.map((hotel) => (
                 <option value={hotel.id} key={hotel.id}>
                   {hotel.name} - {hotel.city}
@@ -215,35 +171,29 @@ export default function AdminDaysheets() {
                 <input
                   type="checkbox"
                   name="buyOut"
-                  checked={isBuyOut}
+                  checked={data.daysheet.buyOut}
                   className="checkbox"
-                  onChange={(e) => {
-                    setIsBuyOut(e.target.checked);
-                    handleInputChange();
-                  }}
                 />
               </label>
             </div>
           </div>
-          {isBuyOut ? (
+          {data.daysheet.buyOut ? (
             <label className="input input-bordered col-span-3 flex items-center gap-2">
               <span>Buyout Amount:</span>
               <input
                 type="number"
                 defaultValue={data.daysheet.buyOutAmount}
                 name="buyOutAmount"
-                onChange={handleInputChange}
                 className="grow"
               />
             </label>
           ) : undefined}
-          {!isBuyOut ? (
+          {!data.daysheet.buyOut ? (
             <label className="input input-bordered col-span-3 flex items-center gap-2">
               <span>Dinner Alternative:</span>
               <input
                 type="text"
                 name="buyOutAlt"
-                onChange={handleInputChange}
                 defaultValue={data.daysheet.buyOutAlt}
                 className="grow"
               />
@@ -255,7 +205,6 @@ export default function AdminDaysheets() {
               type="number"
               defaultValue={data.daysheet.guestsLimit}
               name="guestsLimit"
-              onChange={handleInputChange}
               className="grow"
             />
           </label>
@@ -264,7 +213,7 @@ export default function AdminDaysheets() {
         <div className="divider" />
 
         <fieldset
-          disabled={!formChanged}
+          disabled={location.search != "?edit"}
           className="grid w-full grid-cols-2 gap-4"
         >
           <button type="submit" name="_action" value="reset" className="btn">

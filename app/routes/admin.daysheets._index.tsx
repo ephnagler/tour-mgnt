@@ -104,7 +104,7 @@ export default function DaysheetsIndex() {
               className="select select-bordered w-full max-w-xs"
               defaultValue="default"
             >
-              <option disabled value="default">
+              <option value="default">
                 Venue
               </option>
               {data.venues.map((venue) => (
@@ -118,7 +118,7 @@ export default function DaysheetsIndex() {
               className="select select-bordered w-full max-w-xs"
               defaultValue="default"
             >
-              <option value="default" disabled>
+              <option value="default">
                 Hotel
               </option>
               {data.hotels.map((hotel) => (
