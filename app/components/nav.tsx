@@ -54,8 +54,8 @@ export default function Nav(props: NavProps) {
             </li>
           </ul>
         </div>
-        <Link to={"/"} className="btn btn-ghost hidden text-xl lg:inline-flex">
-          Tour Mgnt App
+        <Link to={"/dashboard"} className="btn btn-ghost hidden text-xl lg:inline-flex">
+        Daysheet Management
         </Link>
       </div>
       <div className="navbar-center hidden lg:flex">
@@ -83,8 +83,8 @@ export default function Nav(props: NavProps) {
         <Link to="/admin/daysheets" className="btn hidden lg:inline-flex">
           ...
         </Link>
-        <Link to={"/"} className="btn btn-ghost text-right text-xl lg:hidden">
-          Tour Mgnt App
+        <Link to={"/dashboard"} className="btn btn-ghost text-right text-xl lg:hidden">
+          Daysheet Management
         </Link>
       </div>
     </div>
