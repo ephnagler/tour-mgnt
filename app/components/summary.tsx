@@ -36,40 +36,53 @@ export default function Summary(props: Summary) {
       </h1>
 
       <div className="shadow stats flex w-full flex-col bg-base-300 sm:grid sm:grid-cols-4">
-        <div className="stat">
-          <div className="stat-figure pt-3 text-accent">
-            <SunIcon strokeWidth={2.5} />
-          </div>
-          <div className="stat-title"></div>
-          <div className="stat-value text-accent">11:00</div>
-          <div className="stat-desc">Drive Time</div>
-        </div>
+        {props.daysheet?.schedules?.map((schedule) => {
+          let textStyle;
+          let alertIcon;
+          let displayAlert = false;
+          switch (schedule.alert) {
+            case "Travel":
+              schedule.name === "Checkout"
+                ? (displayAlert = true)
+                : (displayAlert = false);
+              textStyle = "text-accent";
+              alertIcon = <SunIcon strokeWidth={2.5} />;
+              break;
+            case "Production":
+              schedule.name === "Soundcheck"
+                ? (displayAlert = true)
+                : (displayAlert = false);
+              textStyle = "text-secondary";
+              alertIcon = <MicVocalIcon strokeWidth={2.5} />;
+              break;
+            case "Show":
+              schedule.name === "Doors"
+                ? (displayAlert = true)
+                : (displayAlert = false);
+              textStyle = "text-info";
+              alertIcon = <UsersIcon strokeWidth={2.5} />;
+              break;
+            case "Performance":
+              schedule.name === "Performance"
+                ? (displayAlert = true)
+                : (displayAlert = false);
+              textStyle = "text-primary";
+              alertIcon = <PlayIcon strokeWidth={2.5} />;
+          }
 
-        <div className="stat">
-          <div className="stat-figure pt-3 text-secondary">
-            <MicVocalIcon strokeWidth={2.5} />
-          </div>
-          <div className="stat-title">Soundcheck</div>
-          <div className="stat-value text-secondary">4:30</div>
-          <div className="stat-desc">We have 1 hour.</div>
-        </div>
+          const result = displayAlert ? (
+            <div className="stat" key={schedule.id}>
+              <div className={`stat-figure pt-3 ${textStyle}`}>{alertIcon}</div>
+              <div className="stat-title">{schedule.name}</div>
+              <div className={`stat-value ${textStyle}`}>
+                {schedule.timeFrom.slice(11)}
+              </div>
+              <div className="stat-desc">{schedule.note}</div>
+            </div>
+          ) : null;
 
-        <div className="stat">
-          <div className="stat-figure pt-3 text-info">
-            <UsersIcon strokeWidth={2.5} />
-          </div>
-          <div className="stat-title">Doors at</div>
-          <div className="stat-value text-info">8:00</div>
-          <div className="stat-desc">21% more than last month</div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure pt-3 text-primary">
-            <PlayIcon strokeWidth={2.5} />
-          </div>
-          <div className="stat-title">Set time</div>
-          <div className="stat-value text-primary">11:00</div>
-          <div className="stat-desc">21% more than last month</div>
-        </div>
+          return result;
+        })}
       </div>
     </section>
   );
