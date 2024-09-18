@@ -127,7 +127,7 @@ export default function Index() {
         <div className="flex w-full flex-col">
           <div className="card grid rounded-box bg-base-300 px-8">
             <h3>
-              {data.daysheet?.venue?.name} -{" "}
+              {data.daysheet?.venue?.name}:{" "}
               <span className="text-primary">{spotsLeft}</span> tickets left
             </h3>
             <div className="overflow-x-auto">

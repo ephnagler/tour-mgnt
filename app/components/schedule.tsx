@@ -25,7 +25,7 @@ export default function Schedule(props: ScheduleProps) {
                 {props.schedules?.map((schedule) => (
                   <tr
                     key={schedule.id}
-                    className="flex flex-col sm:grid grid-cols-9 data-[alert=Error]:text-error data-[alert=Info]:text-info data-[alert=Primary]:text-primary data-[alert=Secondary]:text-secondary data-[alert=Success]:text-success data-[alert=Warning]:text-warning data-[alert=Accent]:text-accent"
+                    className="flex flex-col sm:grid grid-cols-9 data-[alert=Error]:text-error data-[alert=Show]:text-info data-[alert=Performance]:text-primary data-[alert=Production]:text-secondary data-[alert=Success]:text-success data-[alert=Warning]:text-warning data-[alert=Travel]:text-accent"
                     data-alert={schedule.alert}
                   >
                     <td>{getScheduledTime(schedule.timeFrom)}</td>

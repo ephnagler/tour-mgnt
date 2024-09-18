@@ -175,8 +175,8 @@ export function deleteGuest({ slug }: Pick<Guest, "slug">) {
 
 /*--- SCHEDULE ---*/
 
-export const alertTypes = ["None", "Info", "Success", "Warning", "Error", "Primary", "Secondary", "Accent"] as const;
-export const alertArray = ["None", "Info", "Success", "Warning", "Error", "Primary", "Secondary", "Accent"];
+export const alertTypes = ["None", "Travel", "Production", "Show", "Performance", "Success", "Warning", "Error"] as const;
+export const alertArray = ["None", "Travel", "Production", "Show", "Performance", "Success", "Warning", "Error"];
 
 export function getSchedule({ slug }: Pick<Schedule, "slug">) {
     return prisma.schedule.findFirst({

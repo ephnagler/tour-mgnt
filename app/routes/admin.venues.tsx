@@ -131,7 +131,7 @@ export default function AdminVenues() {
                 method="post"
                 className="flex w-full flex-col justify-center gap-4 sm:flex-row"
               >
-                <input hidden name="slug" value={location.state.venue.slug} />
+                <input hidden name="slug" defaultValue={location.state.venue.slug} />
                 <button
                   className="btn w-2/5 hover:bg-accent hover:text-black"
                   onClick={() => navigate(-1)}

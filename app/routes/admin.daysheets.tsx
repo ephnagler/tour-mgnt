@@ -143,7 +143,7 @@ export default function AdminDaysheets() {
                 <input
                   hidden
                   name="slug"
-                  value={location.state.daysheet.slug}
+                  defaultValue={location.state.daysheet.slug}
                 />
                 <button
                   className="btn w-2/5 hover:bg-accent hover:text-black"

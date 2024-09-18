@@ -138,7 +138,7 @@ export default function AdminContacts() {
                 method="post"
                 className="flex w-full flex-col justify-center gap-4 sm:flex-row"
               >
-                <input hidden name="slug" value={location.state.contact.slug} />
+                <input hidden name="slug" defaultValue={location.state.contact.slug} />
                 <button
                   type="submit"
                   className="btn w-2/5 hover:bg-accent hover:text-black"

@@ -139,7 +139,7 @@ export default function AdminSchedules() {
                 <input
                   hidden
                   name="slug"
-                  value={location.state.schedule.slug}
+                  defaultValue={location.state.schedule.slug}
                 />
                 <button
                   type="submit"

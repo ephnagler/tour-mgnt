@@ -125,7 +125,7 @@ export default function AdminSchedules() {
         <fieldset className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <input type="hidden" name="id" value={data.schedule.id} />
+              <input type="hidden" name="id" defaultValue={data.schedule.id} />
               <label htmlFor="timeFrom">From</label>
               <input
                 type="datetime-local"
