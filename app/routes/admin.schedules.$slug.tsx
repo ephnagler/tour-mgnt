@@ -6,12 +6,12 @@ import {
 } from "@remix-run/node";
 import {
   Form,
-  useActionData,
   useLoaderData,
   useLocation,
+  useNavigate,
   useRouteError,
 } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
 import { z } from "zod";
 
@@ -34,17 +34,18 @@ const tm = z.string();
 const tmNull = z.string().nullable();
 const AlertEnum = z.enum(alertTypes);
 
-interface ActionData {
-  status: "reset" | "saved" | "view" | null;
-}
-
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   invariant(params.slug, "Schedule not found");
 
   const schedule = await getSchedule({ slug: params.slug });
 
   const daysheets = await prisma.daysheet.findMany({
-    select: { id: true, slug: true, date: true, venue: true },
+    select: {
+      id: true,
+      slug: true,
+      date: true,
+      venue: { select: { name: true } },
+    },
   });
 
   const alerts = alertArray;
@@ -71,7 +72,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const { _action } = Object.fromEntries(formData);
 
   if (_action === "reset") {
-    return json({ status: "reset" });
+    return redirect(`?reset`);
   }
 
   if (_action === "save") {
@@ -99,54 +100,26 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default function AdminSchedules() {
-  const actionData = useActionData<ActionData | null>();
   const data = useLoaderData<typeof loader>();
-  const [formChanged, setFormChanged] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const tm = z.string();
 
-  const daysheetState = data.schedule.daysheet
-    ? data.schedule.daysheet.id
-    : "default";
-
-  const [selectedDaysheet, setSelectedDaysheet] = useState(daysheetState);
-  const [selectedAlert, setSelectedAlert] = useState(data.schedule.alert);
-
-  const handleInputChange = () => {
-    setFormChanged(true);
-  };
-
   useEffect(() => {
-    if (
-      actionData?.status === "reset" ||
-      location.search == "?reset" ||
-      location.search == "?edit"
-    ) {
+    if (location.search === "?reset") {
       formRef.current?.reset();
-      setFormChanged(false);
-    }
-  }, [actionData, location.search]);
-
-  useEffect(() => {
-    if (location.search === "?saved") {
-      setFormChanged(false);
     }
   }, [location.search]);
 
-  useEffect(() => {
-    setSelectedDaysheet(daysheetState);
-    setFormChanged(false);
-  }, [daysheetState]);
-
-  useEffect(() => {
-    setSelectedAlert(data.schedule.alert);
-    setFormChanged(false);
-  }, [data.schedule.alert]);
-
   return (
-    <Form method="post" ref={formRef}>
+    <Form
+      method="post"
+      ref={formRef}
+      key={data.schedule.id}
+      onChange={() => navigate(`?edit`)}
+    >
       <h2 className="mt-0">New Schedule</h2>
       <fieldset className="flex flex-col gap-2">
         <fieldset className="flex flex-col gap-4">
@@ -157,7 +130,6 @@ export default function AdminSchedules() {
               <input
                 type="datetime-local"
                 name="timeFrom"
-                onChange={handleInputChange}
                 defaultValue={data.schedule.timeFrom}
                 className="input input-bordered grow"
               />
@@ -168,7 +140,6 @@ export default function AdminSchedules() {
                 type="datetime-local"
                 name="timeTo"
                 defaultValue={tm.parse(data.schedule.timeTo)}
-                onChange={handleInputChange}
                 className="input input-bordered grow"
               />
             </div>
@@ -179,7 +150,6 @@ export default function AdminSchedules() {
               type="text"
               name="name"
               defaultValue={data.schedule.name}
-              onChange={handleInputChange}
               className="grow"
               placeholder="Name"
               required
@@ -189,14 +159,12 @@ export default function AdminSchedules() {
           <select
             name="alert"
             className="select select-bordered w-full"
-            value={selectedAlert}
-            onChange={(e) => {
-              handleInputChange();
-              setSelectedAlert(e.target.value);
-            }}
+            defaultValue={data.schedule.alert}
           >
             {data.alerts.map((alert, index) => (
-              <option key={index} value={alert}>Alert: {alert}</option>
+              <option key={index} value={alert}>
+                Alert: {alert}
+              </option>
             ))}
           </select>
 
@@ -205,21 +173,14 @@ export default function AdminSchedules() {
             placeholder="Note"
             name="note"
             defaultValue={data.schedule.note}
-            onChange={handleInputChange}
           ></textarea>
 
           <select
             name="daysheet"
-            onChange={(e) => {
-              handleInputChange();
-              setSelectedDaysheet(e.target.value);
-            }}
             className="select select-bordered w-full"
-            value={selectedDaysheet}
+            defaultValue={data.schedule.daysheet?.id}
           >
-            <option value="default" disabled>
-              Daysheet
-            </option>
+            <option value="default">Daysheet</option>
             {data.daysheets.map((daysheet) => (
               <option value={daysheet.id} key={daysheet.id}>
                 {daysheet.date}
@@ -232,7 +193,7 @@ export default function AdminSchedules() {
         <div className="divider" />
 
         <fieldset
-          disabled={!formChanged}
+          disabled={location.search != "?edit"}
           className="grid w-full grid-cols-2 gap-4"
         >
           <button type="submit" name="_action" value="reset" className="btn">

@@ -12,12 +12,10 @@ interface InformationProps {
 }
 
 export default function Information(props: InformationProps) {
-  const venueAddress = `${props.venue?.street}, ${props.venue?.city} ${props.venue?.state}, ${props.venue?.zip}`;
+  const venueAddress = `${props.venue?.street ? props.venue?.street + ", " : ""}${props.venue?.city ? props.venue?.city + ", " : ""}${props.venue?.state ? props.venue?.state + ", " : ""}${props.venue?.zip ? props.venue?.zip : ""}`;
   const venueAddressUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venueAddress)}`;
-  const hotelAddress = `${props.hotel?.street}, ${props.hotel?.city} ${props.hotel?.state}, ${props.hotel?.zip}`;
+  const hotelAddress = `${props.hotel?.street ? props.hotel?.street + ", " : ""}${props.hotel?.city ? props.hotel?.city + ", " : ""}${props.hotel?.state ? props.hotel?.state + ", " : ""}${props.hotel?.zip ? props.hotel?.zip : ""}`;
   const hotelAddressUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotelAddress)}`;
-
-  console.log(hotelAddressUrl);
 
   return (
     <section id="information" className="container prose">
@@ -28,7 +26,7 @@ export default function Information(props: InformationProps) {
           <div className="overflow-x-auto">
             <table className="table">
               <tbody>
-                <tr className="flex flex-col sm:grid grid-cols-5">
+                <tr className="flex grid-cols-5 flex-col sm:grid">
                   <td>Info</td>
                   <td>
                     <a
@@ -52,14 +50,17 @@ export default function Information(props: InformationProps) {
                     </a>
                   </td>
                 </tr>
-                <tr className="flex flex-col sm:grid grid-cols-5">
+                <tr className="flex grid-cols-5 flex-col sm:grid">
                   <td>Address</td>
                   <td className="col-span-4">
-                    <a href={venueAddressUrl}>{venueAddress}</a>
+                    <a href={venueAddressUrl} target="_blank" rel="noreferrer">{venueAddress}</a>
                   </td>
                 </tr>
                 {props.venue?.contacts?.map((contact) => (
-                  <tr key={contact.id} className="flex flex-col sm:grid grid-cols-5">
+                  <tr
+                    key={contact.id}
+                    className="flex grid-cols-5 flex-col sm:grid"
+                  >
                     <td>Contacts</td>
                     <td>{contact.role}</td>
                     <td>{contact.name}</td>
@@ -83,7 +84,7 @@ export default function Information(props: InformationProps) {
           <div className="overflow-x-auto">
             <table className="table">
               <tbody>
-                <tr className="flex flex-col sm:grid grid-cols-5">
+                <tr className="flex grid-cols-5 flex-col sm:grid">
                   <td>Info</td>
                   <td>
                     <a
@@ -105,10 +106,10 @@ export default function Information(props: InformationProps) {
                     </a>
                   </td>
                 </tr>
-                <tr className="flex flex-col sm:grid grid-cols-5">
+                <tr className="flex grid-cols-5 flex-col sm:grid">
                   <td>Address</td>
                   <td className="col-span-4">
-                    <a href={hotelAddressUrl}>{hotelAddress}</a>
+                    <a href={hotelAddressUrl} target="_blank" rel="noreferrer">{hotelAddress}</a>
                   </td>
                 </tr>
               </tbody>

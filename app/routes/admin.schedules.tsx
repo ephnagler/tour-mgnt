@@ -1,16 +1,14 @@
-import { Schedule } from "@prisma/client";
 import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons";
-import { ActionFunction, MetaFunction } from "@remix-run/node";
+import { ActionFunction, MetaFunction, redirect } from "@remix-run/node";
 import {
   Form,
   json,
   Outlet,
-  useActionData,
   useLoaderData,
   useLocation,
   useNavigate,
 } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { z } from "zod";
 
 import { prisma } from "~/db.server";
@@ -28,6 +26,9 @@ export async function loader() {
         timeFrom: "asc",
       },
     ],
+    select: {
+      id: true, slug: true, timeFrom: true, name: true
+    },
   });
 
   return json({ schedules });
@@ -35,53 +36,23 @@ export async function loader() {
 
 const tm = z.string();
 
-interface ActionData {
-  status: "deleted" | "canceled" | null;
-}
-
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
-  const { _action } = Object.fromEntries(formData);
-
-  if (_action === "cancel") {
-    return json({ status: "cancled" });
-  }
   const slug = tm.parse(formData.get("slug"));
-  if (_action === "delete") {
-    await deleteSchedule({ slug });
-    return json({ status: "deleted" });
-  }
+
+  await deleteSchedule({ slug });
+  return redirect(`/admin/schedules`);
 };
 
 export default function AdminSchedules() {
   const data = useLoaderData<typeof loader>();
-  const actionData = useActionData<ActionData | null>();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
-  const [isModalOpen, setModalOpen] = useState(false);
-
-  const openModal = (schedule: Schedule) => {
-    setSelectedSchedule(schedule);
-    setModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedSchedule(null);
-    setModalOpen(false);
-  };
-
-  useEffect(() => {
-    if (actionData?.status === "deleted") {
-      closeModal();
-    }
-  }, [actionData]);
-
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isModalOpen) {
-        closeModal();
+      if (event.key === "Escape" && location.search === "?delete") {
+        navigate(-1);
       }
     };
 
@@ -90,7 +61,7 @@ export default function AdminSchedules() {
     return () => {
       document.removeEventListener("keydown", handleEsc);
     };
-  }, [isModalOpen]); // Dependency on modal state
+  }, [location.search, navigate]); // Dependency on modal state
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
@@ -118,12 +89,14 @@ export default function AdminSchedules() {
               {data.schedules.map((schedule, index) => (
                 <tr
                   data-here={
-                    location.pathname === `/admin/schedules/${schedule.slug}` ? true : false
+                    location.pathname === `/admin/schedules/${schedule.slug}`
+                      ? true
+                      : false
                   }
                   className="data-[here='true']:border-1 cursor-pointer hover:bg-base-200 data-[here='true']:cursor-default data-[here='true']:bg-accent/20"
                   key={schedule.id}
                   onClick={() => {
-                    navigate(`/admin/schedules/${schedule.slug}?edit`, {
+                    navigate(`${schedule.slug}?edit`, {
                       replace: true,
                     });
                   }}
@@ -134,7 +107,12 @@ export default function AdminSchedules() {
                   <td className="text-right">
                     <button
                       className="btn rounded-none hover:bg-red-500"
-                      onClick={() => openModal(schedule)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`${schedule.slug}?delete`, {
+                          state: { schedule: schedule },
+                        });
+                      }}
                     >
                       <Cross2Icon />
                     </button>
@@ -146,25 +124,29 @@ export default function AdminSchedules() {
         </div>
       </div>
 
-      {isModalOpen && selectedSchedule ? (
+      {location.search === "?delete" ? (
         <dialog id="my_modal_1" className="modal text-center" open>
           <div className="modal-box">
             <h3 className="text-lg font-bold">Warning!</h3>
             <p className="py-4">
-              Are you sure you want to delete {selectedSchedule.name}?
+              Are you sure you want to delete {location.state.schedule.name}?
             </p>
             <div className="modal-action">
               <Form
                 method="post"
                 className="flex w-full flex-col justify-center gap-4 sm:flex-row"
               >
-                <input hidden name="slug" value={selectedSchedule.slug} />
+                <input
+                  hidden
+                  name="slug"
+                  value={location.state.schedule.slug}
+                />
                 <button
                   type="submit"
                   name="_action"
                   value="cancel"
                   className="btn w-2/5 hover:bg-accent hover:text-black"
-                  onClick={closeModal}
+                  onClick={() => navigate(-1)}
                 >
                   NAH
                 </button>
@@ -180,7 +162,7 @@ export default function AdminSchedules() {
             </div>
           </div>
           <div className="modal-backdrop bg-black/35 backdrop-blur-sm">
-            <button onClick={closeModal} className="cursor-default">
+            <button onClick={() => navigate(-1)} className="cursor-default">
               close
             </button>
           </div>

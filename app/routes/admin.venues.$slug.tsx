@@ -6,13 +6,12 @@ import {
 } from "@remix-run/node";
 import {
   Form,
-  useActionData,
   useLoaderData,
   useLocation,
   useNavigate,
   useRouteError,
 } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
 import { z } from "zod";
 
@@ -32,9 +31,6 @@ export function ErrorBoundary() {
 }
 
 const tm = z.string();
-interface ActionData {
-  status: "reset" | "saved" | "view" | null;
-}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   invariant(params.slug, "Venue not found");
@@ -63,7 +59,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const { _action } = Object.fromEntries(formData);
 
   if (_action === "reset") {
-    return json({ status: "reset" });
+    return redirect(`?reset`);
   }
 
   if (_action === "save") {
@@ -82,41 +78,29 @@ export const action: ActionFunction = async ({ request, params }) => {
       },
     });
 
-    return redirect(`/admin/venues/${slug}?saved`);
+    return redirect(`/admin/venues/${slug}`);
   }
 };
 
 export default function AdminVenues() {
-  const actionData = useActionData<ActionData | null>();
   const data = useLoaderData<typeof loader>();
-  const [formChanged, setFormChanged] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleInputChange = () => {
-    setFormChanged(true);
-  };
-
   useEffect(() => {
-    if (
-      actionData?.status === "reset" ||
-      location.search == "?reset" ||
-      location.search == "?edit"
-    ) {
+    if (location.search === "?reset") {
       formRef.current?.reset();
-      setFormChanged(false);
     }
-  }, [actionData, location.search]);
-
-  useEffect(() => {
-    if (location.search === "?saved") {
-      setFormChanged(false);
-    }
-  }, [location.search, navigate, data.venue.slug]);
+  }, [location.search]);
 
   return (
-    <Form method="post" ref={formRef}>
+    <Form
+      method="post"
+      ref={formRef}
+      key={data.venue.id}
+      onChange={() => navigate(`?edit`)}
+    >
       <h2 className="mt-0">Edit {data.venue.name}</h2>
       <fieldset className="flex flex-col gap-2">
         <fieldset className="flex flex-col gap-4">
@@ -129,7 +113,6 @@ export default function AdminVenues() {
               className="grow"
               defaultValue={data.venue.name}
               placeholder="Venue"
-              onChange={handleInputChange}
             />
           </label>
           <div className="grid grid-cols-2 gap-4">
@@ -141,7 +124,6 @@ export default function AdminVenues() {
                 className="grow"
                 placeholder="Phone"
                 defaultValue={data.venue.phone}
-                onChange={handleInputChange}
               />
             </label>
             <label className="input input-bordered flex items-center gap-2">
@@ -152,7 +134,6 @@ export default function AdminVenues() {
                 placeholder="Email"
                 className="grow"
                 defaultValue={data.venue.email}
-                onChange={handleInputChange}
               />
             </label>
           </div>
@@ -164,7 +145,6 @@ export default function AdminVenues() {
               placeholder="Website"
               className="grow"
               defaultValue={data.venue.site}
-              onChange={handleInputChange}
             />
           </label>
         </fieldset>
@@ -180,7 +160,6 @@ export default function AdminVenues() {
               className="grow"
               placeholder="Street"
               defaultValue={data.venue.street}
-              onChange={handleInputChange}
             />
           </label>
           <label className="input input-bordered flex items-center gap-2">
@@ -191,7 +170,6 @@ export default function AdminVenues() {
               placeholder="City"
               className="grow"
               defaultValue={data.venue.city}
-              onChange={handleInputChange}
             />
           </label>
           <div className="grid grid-cols-2 gap-4">
@@ -203,7 +181,6 @@ export default function AdminVenues() {
                 placeholder="State"
                 className="grow"
                 defaultValue={data.venue.state}
-                onChange={handleInputChange}
               />
             </label>
             <label className="input input-bordered flex items-center gap-2">
@@ -214,7 +191,6 @@ export default function AdminVenues() {
                 placeholder="Zipcode"
                 className="grow"
                 defaultValue={data.venue.zip}
-                onChange={handleInputChange}
               />
             </label>
           </div>
@@ -222,7 +198,7 @@ export default function AdminVenues() {
 
         <div className="divider" />
         <fieldset
-          disabled={!formChanged}
+          disabled={location.search != "?edit"}
           className="grid w-full grid-cols-2 gap-4"
         >
           <button type="submit" name="_action" value="reset" className="btn">

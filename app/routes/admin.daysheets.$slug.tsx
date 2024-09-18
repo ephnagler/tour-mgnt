@@ -68,7 +68,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const { _action } = Object.fromEntries(formData);
 
   if (_action === "reset") {
-    return redirect(`/admin/daysheets/${slug}?reset`);
+    return redirect(`/admin/daysheets/${params.slug}?reset`);
   }
 
   if (_action === "save") {
@@ -116,7 +116,7 @@ export default function AdminDaysheets() {
       ref={formRef}
       key={data.daysheet.slug}
       onChange={() => {
-        navigate(`/admin/daysheets/${data.daysheet.slug}?edit`);
+        navigate(`?edit`);
       }}
     >
       <h2 className="mt-0">Edit Daysheet: {data.daysheet.date}</h2>

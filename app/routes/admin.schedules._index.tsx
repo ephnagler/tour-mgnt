@@ -27,7 +27,12 @@ export async function loader() {
     select: { id: true, name: true, city: true },
   });
   const daysheets = await prisma.daysheet.findMany({
-    select: { id: true, slug: true, date: true, venue: true },
+    select: {
+      id: true,
+      slug: true,
+      date: true,
+      venue: { select: { name: true } },
+    },
   });
   const alerts = alertArray;
 
@@ -111,10 +116,12 @@ export default function SchedulesIndex() {
             defaultValue="none"
           >
             {data.alerts.map((alert, index) => (
-              <option key={index} value={alert}>Alert: {alert}</option>
+              <option key={index} value={alert}>
+                Alert: {alert}
+              </option>
             ))}
           </select>
-          
+
           <textarea
             className="textarea textarea-bordered"
             placeholder="Note"

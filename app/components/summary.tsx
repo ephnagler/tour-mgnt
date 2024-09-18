@@ -1,3 +1,4 @@
+import { Contact, Daysheet, Hotel, Schedule, Venue } from "@prisma/client";
 import {
   MicVocalIcon,
   MoonIcon,
@@ -6,31 +7,39 @@ import {
   UsersIcon,
 } from "lucide-react";
 
+import { fullDayNames, fullMonthNames } from "~/utils";
+
+interface VenueExtended extends Venue {
+  contacts?: Contact[] | null;
+}
+
+interface DaysheetExtended extends Daysheet {
+  venue?: VenueExtended | null;
+  hotel?: Hotel | null;
+  schedules?: Schedule[] | null;
+}
+
 interface Summary {
-  venue?: string;
-  city?: string;
-  children?: JSX.Element | JSX.Element[];
+  daysheet?: DaysheetExtended | null;
 }
 
 export default function Summary(props: Summary) {
-  const today = new Date();
+  const event = new Date(String(props.daysheet?.date));
 
   return (
     <section className="container prose">
-      <div className="mb-2">{props.city ? props.city : ""}, State, Country</div>
+      <div className="mb-2">
+        {props.daysheet?.venue?.city}, {props.daysheet?.venue?.state}
+      </div>
       <h1 className="flex w-full flex-col justify-between sm:flex-row">
-        <span>{props.venue}</span>
+        <span>{props.daysheet?.venue?.name}</span>
         <span className="text-2xl">
-          {today.toLocaleDateString(undefined, {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
+          {fullDayNames[event.getDay()]}, {fullMonthNames[event.getMonth()]}{" "}
+          {props.daysheet?.date.slice(8)}, {event.getFullYear()}, 
         </span>
       </h1>
 
-      <div className="shadow stats flex flex-col sm:grid w-full sm:grid-cols-5 bg-base-300">
+      <div className="shadow stats flex w-full flex-col bg-base-300 sm:grid sm:grid-cols-5">
         <div className="stat">
           <div className="stat-figure pt-3 text-accent">
             <SunIcon strokeWidth={2.5} />

@@ -113,6 +113,8 @@ export function getScheduledTime(str: string) {
 }
 
 export const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+export const fullMonthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "Decemebr"]
+export const fullDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
 export function formatPhoneNumber(phoneNumberString: string) {
   const cleaned = ('' + phoneNumberString).replace(/\D/g, '');
