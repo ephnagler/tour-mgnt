@@ -21,7 +21,7 @@ export default function Progress(props: ProgressProps) {
 
   return (
     <section className="container prose">
-      <h2>Progress</h2>
+      {props.dates.length > 0 ? <h2>Progress</h2> : ""}
       <ul
         id="progressContainer"
         className="timeline overflow-x-auto rounded-box bg-base-300 ps-0"

@@ -20,19 +20,26 @@ interface Summary {
 
 export default function Summary(props: Summary) {
   const tm = z.string();
-  const event = new Date(tm.parse(props.daysheet?.date));
+  const event = props.daysheet?.date
+    ? new Date(tm.parse(props.daysheet?.date))
+    : null;
 
   return (
-    <section className="container prose">
+    <section className="container prose pt-12">
       <div className="mb-2">
-        {props.daysheet?.venue?.city}, {props.daysheet?.venue?.state}
+        {props.daysheet?.venue?.city}{props.daysheet?.venue?.state ? ', ' + props.daysheet?.venue?.state : "" }
       </div>
       <h1 className="flex w-full flex-col justify-between sm:flex-row">
         <span>{props.daysheet?.venue?.name}</span>
-        <span className="text-2xl">
-          {fullDayNames[event.getDay() + 1]}, {fullMonthNames[event.getMonth()]}{" "}
-          {props.daysheet?.date.slice(8)}, {event.getFullYear()},
-        </span>
+        {event ? (
+          <span className="text-2xl">
+            {fullDayNames[event.getDay() + 1]},{" "}
+            {fullMonthNames[event.getMonth()]} {props.daysheet?.date.slice(8)},{" "}
+            {event.getFullYear()},
+          </span>
+        ) : (
+          ""
+        )}
       </h1>
 
       <div className="shadow stats flex w-full flex-col bg-base-300 sm:grid sm:grid-cols-4">
